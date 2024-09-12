@@ -14,6 +14,7 @@ import com.online_milk_store.product_service.bean.CategoryBean;
 import com.online_milk_store.product_service.entity.CategoryEntity;
 import com.online_milk_store.product_service.exception.CategoriesNotAvailableException;
 import com.online_milk_store.product_service.exception.CategoryAlreadyExistsException;
+import com.online_milk_store.product_service.exception.CategoryNotAvailableException;
 import com.online_milk_store.product_service.repository.CategoryRepository;
 
 @Service
@@ -37,6 +38,7 @@ public class CategoryService {
 			.map(categoryEntity -> CategoryBean.builder()
 					.categoryId(categoryEntity.getCategoryId())
 					.categoryName(categoryEntity.getCategoryName())
+					.categoryAvailable(categoryEntity.getCategoryAvailable())
 					.build())
 			.collect(Collectors.toList());
 		LOGGER.info("CategoryService.getAllAvailableCategories() --- listAllAvailableCategoriesBeans: " + listAllAvailableCategoriesBeans);
@@ -64,5 +66,22 @@ public class CategoryService {
 		LOGGER.debug("CategoryService.createCategory() --- END");
 		LOGGER.debug("CategoryService.createCategory() --- retrieving all available categories");
 		return getAllAvailableCategories();
+	}
+
+	public CategoryBean updateCategory(int categoryId, CategoryBean categoryBean) {
+		LOGGER.debug("CategoryService.updateCategory() --- START");
+		LOGGER.info("CategoryService.updateCategory() --- id of Category to update: " + categoryId);
+		LOGGER.info("CategoryService.updateCategory() --- Category to update: " + categoryBean);
+		CategoryEntity categoryEntity = categoryRepository.findById(categoryId)
+				.orElseThrow(() -> new CategoryNotAvailableException("Category with id " + categoryId + " not found"));
+		categoryEntity.setCategoryName(categoryBean.getCategoryName());
+		categoryEntity.setCategoryAvailable(categoryBean.getCategoryAvailable());
+		CategoryEntity categoryEntityUpdated = categoryRepository.save(categoryEntity);
+		LOGGER.info("CategoryService.updateCategory() --- updated category entity: " + categoryEntityUpdated);
+		categoryBean.setCategoryName(categoryEntity.getCategoryName());
+		categoryBean.setCategoryAvailable(categoryEntity.getCategoryAvailable());
+		LOGGER.info("CategoryService.updateCategory() --- updated category bean: " + categoryBean);
+		LOGGER.debug("CategoryService.updateCategory() --- END");
+		return categoryBean;
 	}
 }
