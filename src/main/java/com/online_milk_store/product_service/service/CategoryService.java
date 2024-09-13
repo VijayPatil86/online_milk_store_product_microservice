@@ -1,6 +1,7 @@
 package com.online_milk_store.product_service.service;
 
 import java.util.List;
+import java.util.Objects;
 import java.util.Optional;
 import java.util.stream.Collectors;
 
@@ -29,11 +30,11 @@ public class CategoryService {
 	public List<CategoryBean> getAllAvailableCategories() {
 		LOGGER.debug("CategoryService.getAllAvailableCategories() --- START");
 		List<CategoryEntity> listAllAvailableCategoriesEntities = categoryRepository.findByCategoryAvailableIs("Y");
+		LOGGER.info("CategoryService.getAllAvailableCategories() --- listAllAvailableCategoriesEntities: " + listAllAvailableCategoriesEntities);
 		if(listAllAvailableCategoriesEntities == null || listAllAvailableCategoriesEntities.size() == 0) {
 			LOGGER.info("CategoryService.getAllAvailableCategories() --- all categories not available, raising CategoriesNotAvailableException");
 			throw new CategoriesNotAvailableException();
 		}
-		LOGGER.info("CategoryService.getAllAvailableCategories() --- listAllAvailableCategoriesEntities: " + listAllAvailableCategoriesEntities);
 		List<CategoryBean> listAllAvailableCategoriesBeans = listAllAvailableCategoriesEntities.stream()
 			.map(categoryEntity -> CategoryBean.builder()
 					.categoryId(categoryEntity.getCategoryId())
@@ -46,7 +47,7 @@ public class CategoryService {
 		return listAllAvailableCategoriesBeans;
 	}
 
-	public List<CategoryBean> createCategory(CategoryBean categoryBean) {
+	public CategoryBean createCategory(CategoryBean categoryBean) {
 		LOGGER.debug("CategoryService.createCategory() --- START");
 		LOGGER.debug("CategoryService.createCategory() --- Category to create: " + categoryBean);
 		Optional<CategoryEntity> optionalCategoryEntity = categoryRepository.findByCategoryNameIs(categoryBean.getCategoryName());
@@ -59,13 +60,18 @@ public class CategoryService {
 		}
 		CategoryEntity categoryEntityToSave = CategoryEntity.builder()
 			.categoryName(categoryBean.getCategoryName())
+			.categoryAvailable("Y")
 			.build();
 		LOGGER.info("CategoryService.createCategory() --- CategoryEntity to save: " + categoryEntityToSave);
 		CategoryEntity categoryEntitySaved = categoryRepository.save(categoryEntityToSave);
 		LOGGER.info("CategoryService.createCategory() --- saved CategoryEntity: " + categoryEntitySaved);
+		categoryBean.setCategoryId(categoryEntitySaved.getCategoryId());
+		categoryBean.setCategoryName(categoryEntitySaved.getCategoryName());
+		categoryBean.setCategoryAvailable(categoryEntitySaved.getCategoryAvailable());
+		LOGGER.info("CategoryService.createCategory() --- saved CategoryBean: " + categoryBean);
 		LOGGER.debug("CategoryService.createCategory() --- END");
 		LOGGER.debug("CategoryService.createCategory() --- retrieving all available categories");
-		return getAllAvailableCategories();
+		return categoryBean;
 	}
 
 	public CategoryBean updateCategory(int categoryId, CategoryBean categoryBean) {
@@ -75,7 +81,7 @@ public class CategoryService {
 		CategoryEntity categoryEntity = categoryRepository.findById(categoryId)
 				.orElseThrow(() -> new CategoryNotAvailableException("Category with id " + categoryId + " not found"));
 		categoryEntity.setCategoryName(categoryBean.getCategoryName());
-		categoryEntity.setCategoryAvailable(categoryBean.getCategoryAvailable());
+		categoryEntity.setCategoryAvailable(Objects.isNull(categoryBean.getCategoryAvailable()) ? "Y" : categoryBean.getCategoryAvailable());
 		CategoryEntity categoryEntityUpdated = categoryRepository.save(categoryEntity);
 		LOGGER.info("CategoryService.updateCategory() --- updated category entity: " + categoryEntityUpdated);
 		categoryBean.setCategoryName(categoryEntity.getCategoryName());
