@@ -1,5 +1,7 @@
 package com.online_milk_store.product_service.controller;
 
+import static org.springframework.hateoas.server.mvc.WebMvcLinkBuilder.methodOn;
+
 import java.util.List;
 
 import org.apache.logging.log4j.LogManager;
@@ -7,7 +9,6 @@ import org.apache.logging.log4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.hateoas.server.mvc.WebMvcLinkBuilder;
 import org.springframework.http.HttpStatus;
-import org.springframework.http.HttpStatusCode;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.CrossOrigin;
 import org.springframework.web.bind.annotation.ExceptionHandler;
@@ -19,14 +20,12 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
+import com.online_milk_store.product_service.bean.CategoriesContainer;
 import com.online_milk_store.product_service.bean.CategoryBean;
-import com.online_milk_store.product_service.bean.CategoryContainer;
 import com.online_milk_store.product_service.exception.CategoriesNotAvailableException;
 import com.online_milk_store.product_service.exception.CategoryAlreadyExistsException;
 import com.online_milk_store.product_service.exception.CategoryNotAvailableException;
 import com.online_milk_store.product_service.service.CategoryService;
-
-import static org.springframework.hateoas.server.mvc.WebMvcLinkBuilder.*;
 
 @CrossOrigin
 @RestController
@@ -37,38 +36,47 @@ public class CategoriesController {
 	@Autowired
 	private CategoryService categoryService;
 	
+	@GetMapping("get_HATEOAS_links")
+	public ResponseEntity<CategoriesContainer> get_HATEOAS_links() {
+		CategoriesContainer categoriesContainer = CategoriesContainer.builder().build();
+		categoriesContainer.add(
+				WebMvcLinkBuilder.linkTo(methodOn(CategoriesController.class).getAllAvailableCategories()).withRel("link_getAllAvailableCategories")
+		);
+		return new ResponseEntity<>(categoriesContainer, HttpStatus.OK);
+	}
+
 	@GetMapping
-	public ResponseEntity<CategoryContainer> getAllAvailableCategories() {
+	public ResponseEntity<CategoriesContainer> getAllAvailableCategories() {
 		LOGGER.debug("CategoriesController.getAllAvailableCategories() --- START");
 		List<CategoryBean> listAllAvailableCategoriesBeans = categoryService.getAllAvailableCategories();
 		LOGGER.info("CategoriesController.getAllAvailableCategories() --- listAllAvailableCategoryBeans: " + listAllAvailableCategoriesBeans);
 		LOGGER.info("CategoriesController.getAllAvailableCategories() --- adding HATEOAS links");
-		CategoryContainer categoryContainer = CategoryContainer.builder()
+		CategoriesContainer categoryContainer = CategoriesContainer.builder()
 				.categoryBeans(listAllAvailableCategoriesBeans)
 				.build();
 		categoryContainer = hateoas_getAllAvailableCategories(categoryContainer);
 		LOGGER.info("CategoriesController.getAllAvailableCategories() --- HATEOAS links are: " + categoryContainer);
-		ResponseEntity<CategoryContainer> responseEntity = new ResponseEntity<>(categoryContainer, HttpStatus.OK);
+		ResponseEntity<CategoriesContainer> responseEntity = new ResponseEntity<>(categoryContainer, HttpStatus.OK);
 		LOGGER.debug("CategoriesController.getAllAvailableCategories() --- END");
 		return responseEntity;
 	}
 	
-	private CategoryContainer hateoas_getAllAvailableCategories(CategoryContainer categoryContainer) {
+	private CategoriesContainer hateoas_getAllAvailableCategories(CategoriesContainer categoryContainer) {
 		LOGGER.debug("CategoriesController.hateoas_getAllAvailableCategories() --- START");
 		categoryContainer.add(
-				WebMvcLinkBuilder.linkTo(methodOn(CategoriesController.class).getAllAvailableCategories()).withSelfRel());
+				WebMvcLinkBuilder.linkTo(methodOn(CategoriesController.class).getAllAvailableCategories()).withRel("link_getAllAvailableCategories"));
 		LOGGER.info("CategoriesController.hateoas_getAllAvailableCategories() --- HATEOAS links are: " + categoryContainer);
 		LOGGER.debug("CategoriesController.hateoas_getAllAvailableCategories() --- END");
 		return categoryContainer;
 	}
 
 	@PostMapping
-	public ResponseEntity<List<CategoryBean>> createCategory(@RequestBody CategoryBean categoryBean){
+	public ResponseEntity<CategoryBean> createCategory(@RequestBody CategoryBean categoryBean){
 		LOGGER.debug("CategoriesController.createCategory() --- START");
 		LOGGER.info("CategoriesController.createCategory() --- Category to create:" + categoryBean);
-		List<CategoryBean> listAllAvailableCategoriesBeans = categoryService.createCategory(categoryBean);
-		LOGGER.info("CategoryService.createCategory() --- listAllAvailableCategoriesBeans: " + listAllAvailableCategoriesBeans);
-		ResponseEntity<List<CategoryBean>> responseEntity = new ResponseEntity<>(listAllAvailableCategoriesBeans, HttpStatus.OK);
+		CategoryBean createdCategoryBeans = categoryService.createCategory(categoryBean);
+		LOGGER.info("CategoryService.createCategory() --- createdCategoryBeans: " + createdCategoryBeans);
+		ResponseEntity<CategoryBean> responseEntity = new ResponseEntity<>(createdCategoryBeans, HttpStatus.OK);
 		LOGGER.debug("CategoriesController.createCategory() --- END");
 		return responseEntity;
 	}
