@@ -84,10 +84,27 @@ public class CategoryService {
 		categoryEntity.setCategoryAvailable(Objects.isNull(categoryBean.getCategoryAvailable()) ? "Y" : categoryBean.getCategoryAvailable());
 		CategoryEntity categoryEntityUpdated = categoryRepository.save(categoryEntity);
 		LOGGER.info("CategoryService.updateCategory() --- updated category entity: " + categoryEntityUpdated);
+		categoryBean.setCategoryId(categoryEntity.getCategoryId());
 		categoryBean.setCategoryName(categoryEntity.getCategoryName());
 		categoryBean.setCategoryAvailable(categoryEntity.getCategoryAvailable());
 		LOGGER.info("CategoryService.updateCategory() --- updated category bean: " + categoryBean);
 		LOGGER.debug("CategoryService.updateCategory() --- END");
+		return categoryBean;
+	}
+
+	public CategoryBean getCategoryById(int categoryId) {
+		LOGGER.debug("CategoryService.getCategoryById() --- START");
+		LOGGER.info("CategoryService.getCategoryById() --- categoryId: " + categoryId);
+		CategoryEntity categoryEntity = categoryRepository.findById(categoryId)
+				.orElseThrow(() -> new CategoryNotAvailableException("Category with id " + categoryId + " not found"));
+		LOGGER.info("CategoryService.getCategoryById() --- category entity with category id: " + categoryId + " found, category entity is: " + categoryEntity);
+		CategoryBean categoryBean = CategoryBean.builder()
+				.categoryId(categoryEntity.getCategoryId())
+				.categoryName(categoryEntity.getCategoryName())
+				.categoryAvailable(categoryEntity.getCategoryAvailable())
+				.build();
+		LOGGER.info("CategoryService.getCategoryById() --- categoryBean: " + categoryBean);
+		LOGGER.debug("CategoryService.getCategoryById() --- END");
 		return categoryBean;
 	}
 }
