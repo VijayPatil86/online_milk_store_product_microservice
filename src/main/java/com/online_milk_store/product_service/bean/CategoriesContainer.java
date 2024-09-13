@@ -11,5 +11,6 @@ import lombok.ToString;
 
 @Getter @Setter @Builder @ToString
 public class CategoriesContainer extends RepresentationModel<CategoriesContainer>{
+	private CategoryBean categoryBean;
 	private List<CategoryBean> categoryBeans;
 }
