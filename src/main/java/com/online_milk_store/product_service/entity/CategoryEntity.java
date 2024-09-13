@@ -25,6 +25,6 @@ public class CategoryEntity {
 	@Column(name = "CATEGORY_NAME")
 	private String categoryName;
 	
-	@Column(name = "CATEGORY_AVAILABLE", insertable = false)
+	@Column(name = "CATEGORY_AVAILABLE")
 	private String categoryAvailable;
 }
