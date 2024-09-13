@@ -92,6 +92,16 @@ public class CategoriesController {
 		return new ResponseEntity<>(categoryBean, HttpStatus.OK);
 	}
 
+	@GetMapping("/{categoryId}")
+	public ResponseEntity<CategoryBean> getCategoryById(@PathVariable(name = "categoryId") int categoryId){
+		LOGGER.debug("CategoriesController.getCategoryById() --- START");
+		LOGGER.info("CategoriesController.getCategoryById() --- categoryId: " + categoryId);
+		CategoryBean categoryBean = categoryService.getCategoryById(categoryId);
+		LOGGER.info("CategoriesController.getCategoryById() --- categoryBean: " + categoryBean);
+		LOGGER.debug("CategoriesController.getCategoryById() --- END");
+		return new ResponseEntity<>(categoryBean, HttpStatus.OK);
+	}
+
 	/*** Exception Handling section ***/
 	@ExceptionHandler(value = {CategoriesNotAvailableException.class})
 	public ResponseEntity<Void> handleCategoriesNotAvailableException() {
