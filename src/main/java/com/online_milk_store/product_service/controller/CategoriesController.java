@@ -36,12 +36,15 @@ public class CategoriesController {
 	@Autowired
 	private CategoryService categoryService;
 	
-	@GetMapping("get_HATEOAS_links")
+	@GetMapping("/get_HATEOAS_links")
 	public ResponseEntity<CategoriesContainer> get_HATEOAS_links() {
+		LOGGER.debug("CategoriesController.get_HATEOAS_links() --- START");
 		CategoriesContainer categoriesContainer = CategoriesContainer.builder().build();
 		categoriesContainer.add(
 				WebMvcLinkBuilder.linkTo(methodOn(CategoriesController.class).getAllAvailableCategories()).withRel("link_getAllAvailableCategories")
 		);
+		LOGGER.info("CategoriesController.get_HATEOAS_links() --- categoriesContainer: " + categoriesContainer);
+		LOGGER.debug("CategoriesController.get_HATEOAS_links() --- END");
 		return new ResponseEntity<>(categoriesContainer, HttpStatus.OK);
 	}
 
