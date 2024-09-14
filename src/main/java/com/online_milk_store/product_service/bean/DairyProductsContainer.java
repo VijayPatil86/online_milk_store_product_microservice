@@ -12,5 +12,5 @@ import lombok.ToString;
 @Getter @Setter @Builder @ToString
 public class DairyProductsContainer extends RepresentationModel<DairyProductsContainer>{
 	private DairyProductBean dairyProductBean;
-	private List<DairyProductBean> categoryBeans;
+	private List<DairyProductBean> dairyProductBeans;
 }
