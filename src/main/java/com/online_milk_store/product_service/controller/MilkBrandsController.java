@@ -29,6 +29,17 @@ public class MilkBrandsController {
 	@Autowired
 	private MilkBrandService milkBrandService;
 
+	@GetMapping("/get_HATEOAS_links")
+	public ResponseEntity<MilkBrandsContainer> get_HATEOAS_links() {
+		LOGGER.debug("MilkBrandsController.get_HATEOAS_links() --- START");
+		MilkBrandsContainer milkBrandsContainer = MilkBrandsContainer.builder().build();
+		milkBrandsContainer.add(
+				WebMvcLinkBuilder.linkTo(methodOn(MilkBrandsController.class).getAllAvailableMilkBrands()).withRel("link_getAllAvailableMilkBrands"));
+		LOGGER.debug("MilkBrandsController.get_HATEOAS_links() --- milkBrandsContainer: " + milkBrandsContainer);
+		LOGGER.debug("MilkBrandsController.get_HATEOAS_links() --- END");
+		return new ResponseEntity<>(milkBrandsContainer, HttpStatus.OK);
+	}
+
 	@GetMapping
 	public ResponseEntity<MilkBrandsContainer> getAllAvailableMilkBrands() {
 		LOGGER.debug("MilkBrandsController.getAllAvailableMilkBrands() --- START");
