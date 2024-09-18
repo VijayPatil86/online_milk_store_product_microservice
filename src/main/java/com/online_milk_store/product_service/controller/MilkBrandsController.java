@@ -1,6 +1,7 @@
 package com.online_milk_store.product_service.controller;
 
 import static org.springframework.hateoas.server.mvc.WebMvcLinkBuilder.methodOn;
+
 import java.util.List;
 
 import org.apache.logging.log4j.LogManager;
@@ -12,11 +13,17 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.CrossOrigin;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
 import com.online_milk_store.product_service.bean.MilkBrandBean;
 import com.online_milk_store.product_service.bean.MilkBrandsContainer;
+import com.online_milk_store.product_service.exception.DairyProductNotAvailableException;
+import com.online_milk_store.product_service.exception.MilkBrandAlreadyExistsException;
+import com.online_milk_store.product_service.exception.MilkBrandNotAvailableException;
 import com.online_milk_store.product_service.exception.MilkBrandsNotAvailableException;
 import com.online_milk_store.product_service.service.MilkBrandService;
 
@@ -44,6 +51,11 @@ public class MilkBrandsController {
 	public ResponseEntity<MilkBrandsContainer> getAllAvailableMilkBrands() {
 		LOGGER.debug("MilkBrandsController.getAllAvailableMilkBrands() --- START");
 		List<MilkBrandBean> listAllAvailableMilkBrandsBeans = milkBrandService.getAllAvailableMilkBrands();
+		listAllAvailableMilkBrandsBeans.stream()
+			.forEach(milkBrandsBean ->
+					milkBrandsBean.add(
+							WebMvcLinkBuilder.linkTo(methodOn(MilkBrandsController.class).getMilkBrandById(milkBrandsBean.getMilkBrandId()))
+							.withRel("link_getMilkBrandById")));
 		LOGGER.info("MilkBrandsController.getAllAvailableMilkBrands() --- listAllAvailableMilkBrandsBeans: " + listAllAvailableMilkBrandsBeans);
 		MilkBrandsContainer milkBrandsContainer = MilkBrandsContainer.builder()
 				.milkBrandBeans(listAllAvailableMilkBrandsBeans)
@@ -56,12 +68,82 @@ public class MilkBrandsController {
 		return new ResponseEntity<>(milkBrandsContainer, HttpStatus.OK);
 	}
 
+	@PostMapping("/{dairyProductId}")
+	public ResponseEntity<MilkBrandsContainer> saveMilkBrand(@PathVariable("dairyProductId") int dairyProductId,
+			@RequestBody MilkBrandBean milkBrandBean) {
+		LOGGER.debug("MilkBrandsController.saveMilkBrand() --- START");
+		LOGGER.info("MilkBrandsController.saveMilkBrand() --- dairyProductId: " + dairyProductId);
+		LOGGER.info("MilkBrandsController.saveMilkBrand() --- milkBrandBean to save: " + milkBrandBean);
+		MilkBrandBean savedMilkBrandBean = milkBrandService.saveMilkBrand(dairyProductId, milkBrandBean);
+		LOGGER.info("MilkBrandsController.saveMilkBrand() --- saved MilkBrandBean: " + savedMilkBrandBean);
+		savedMilkBrandBean.add(
+				WebMvcLinkBuilder.linkTo(methodOn(MilkBrandsController.class).getMilkBrandById(savedMilkBrandBean.getMilkBrandId()))
+				.withRel("link_getMilkBrandById"));
+		LOGGER.info("MilkBrandsController.saveMilkBrand() --- added HATEOAS links to MilkBrandBean: " + savedMilkBrandBean);
+		MilkBrandsContainer milkBrandsContainer = MilkBrandsContainer.builder().build();
+		milkBrandsContainer.setMilkBrandBean(savedMilkBrandBean);
+		milkBrandsContainer.add(
+				WebMvcLinkBuilder.linkTo(methodOn(MilkBrandsController.class).getAllAvailableMilkBrands())
+				.withRel("link_getAllAvailableMilkBrands"));
+		LOGGER.info("MilkBrandsController.saveMilkBrand() --- milkBrandsContainer: " + milkBrandsContainer);
+		LOGGER.debug("MilkBrandsController.saveMilkBrand() --- END");
+		return new ResponseEntity<>(milkBrandsContainer, HttpStatus.OK);
+	}
+
+	@GetMapping("/{milkBrandId}")
+	public ResponseEntity<MilkBrandsContainer> getMilkBrandById(@PathVariable("milkBrandId") int milkBrandId) {
+		LOGGER.debug("MilkBrandsController.getMilkBrandById() --- START");
+		LOGGER.info("MilkBrandsController.getMilkBrandById() --- milkBrandId: " + milkBrandId);
+		MilkBrandBean milkBrandBean = milkBrandService.getMilkBrandById(milkBrandId);
+		milkBrandBean.add(
+				WebMvcLinkBuilder.linkTo(methodOn(MilkBrandsController.class).getMilkBrandById(milkBrandId)).withRel("link_getMilkBrandById"));
+		LOGGER.info("MilkBrandsController.getMilkBrandById() --- milkBrandBean: " + milkBrandBean);
+		MilkBrandsContainer milkBrandsContainer = MilkBrandsContainer.builder()
+				.milkBrandBean(milkBrandBean)
+				.build();
+		milkBrandsContainer.add(
+				WebMvcLinkBuilder.linkTo(methodOn(MilkBrandsController.class).getAllAvailableMilkBrands()).withRel("link_getAllAvailableMilkBrands"));
+		LOGGER.info("MilkBrandsController.getMilkBrandById() --- milkBrandsContainer: " + milkBrandsContainer);
+		LOGGER.debug("MilkBrandsController.getMilkBrandById() --- END");
+		return new ResponseEntity<>(milkBrandsContainer, HttpStatus.OK);
+	}
+
 	/** Exception Handling section **/
 	@ExceptionHandler(value = {MilkBrandsNotAvailableException.class})
 	public ResponseEntity<Void> handleMilkBrandsNotAvailableException() {
 		LOGGER.debug("MilkBrandsController.handleMilkBrandsNotAvailableException() --- START");
 		LOGGER.info("MilkBrandsController.handleMilkBrandsNotAvailableException() --- Milk Brands Not Available, returning No Content 204");
 		LOGGER.debug("MilkBrandsController.handleMilkBrandsNotAvailableException() --- END");
+		return ResponseEntity.noContent().build();
+	}
+
+	@ExceptionHandler(value = {DairyProductNotAvailableException.class})
+	public ResponseEntity<Void> handleDairyProductNotAvailableException(DairyProductNotAvailableException dairyProductNotAvailableException) {
+		LOGGER.debug("MilkBrandsController.handleDairyProductNotAvailableException() --- START");
+		LOGGER.info("MilkBrandsController.handleDairyProductNotAvailableException() --- " +
+				dairyProductNotAvailableException.getMessage() +
+				", returning No Content 204");
+		LOGGER.debug("MilkBrandsController.handleDairyProductNotAvailableException() --- END");
+		return new ResponseEntity<>(HttpStatus.NO_CONTENT);
+	}
+
+	@ExceptionHandler(value = {MilkBrandAlreadyExistsException.class})
+	public ResponseEntity<String> handleMilkBrandAlreadyExistsException(MilkBrandAlreadyExistsException milkBrandAlreadyExistsException) {
+		LOGGER.debug("MilkBrandsController.handleMilkBrandAlreadyExistsException() --- START");
+		LOGGER.info("MilkBrandsController.handleMilkBrandAlreadyExistsException() --- " +
+				milkBrandAlreadyExistsException.getMessage() +
+				", returning Conflict 409");
+		LOGGER.debug("MilkBrandsController.handleMilkBrandAlreadyExistsException() --- END");
+		return new ResponseEntity<>(milkBrandAlreadyExistsException.getMessage(), HttpStatus.CONFLICT);
+	}
+
+	@ExceptionHandler(value = {MilkBrandNotAvailableException.class})
+	public ResponseEntity<Void> handleMilkBrandNotAvailableException(MilkBrandNotAvailableException milkBrandNotAvailableException) {
+		LOGGER.debug("MilkBrandsController.handleMilkBrandNotAvailableException() --- START");
+		LOGGER.info("DairyProductsController.handleDairyProductNotAvailableException() --- " +
+				milkBrandNotAvailableException.getMessage() +
+				", returning No Content 204");
+		LOGGER.debug("MilkBrandsController.handleMilkBrandNotAvailableException() --- END");
 		return ResponseEntity.noContent().build();
 	}
 }
