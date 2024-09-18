@@ -34,7 +34,8 @@ public class MilkBrandService {
 	@Transactional(readOnly = true)
 	public List<MilkBrandBean> getAllAvailableMilkBrands() {
 		LOGGER.debug("MilkBrandService.getAllAvailableMilkBrands() --- START");
-		List<MilkBrandEntity> listAllAvailableMilkBrandsEntities = milkBrandRepository.findByMilkBrandAvailableIs("Y");
+		List<MilkBrandEntity> listAllAvailableMilkBrandsEntities =
+				milkBrandRepository.findByMilkBrandAvailableOrderByMilkBrandNameAscPackagingAsc("Y");
 		LOGGER.info("MilkBrandService.getAllAvailableMilkBrands() --- listAllAvailableMilkBrandsEntities: " + listAllAvailableMilkBrandsEntities);
 		if(listAllAvailableMilkBrandsEntities == null || listAllAvailableMilkBrandsEntities.size() == 0) {
 			LOGGER.info("MilkBrandService.getAllAvailableMilkBrands() --- all milk brands not available, raising MilkBrandsNotAvailableException");
