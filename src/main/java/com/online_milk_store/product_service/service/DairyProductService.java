@@ -71,7 +71,7 @@ public class DairyProductService {
 		LOGGER.info("DairyProductService.saveDairyProduct() --- found Category Entity: " + categoryEntity);
 		DairyProductEntity dairyProductEntityToSave = DairyProductEntity.builder()
 				.dairyProductName(dairyProductBean.getDairyProductName())
-				.dairyProductAvailable("Y")
+				.dairyProductAvailable(dairyProductBean.getDairyProductAvailable())
 				.categoryEntity(categoryEntity)
 				.build();
 		LOGGER.info("DairyProductService.saveDairyProduct() --- dairyProductEntityToSave to save: " + dairyProductEntityToSave);
