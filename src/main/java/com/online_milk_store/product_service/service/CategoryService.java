@@ -60,7 +60,7 @@ public class CategoryService {
 		}
 		CategoryEntity categoryEntityToSave = CategoryEntity.builder()
 			.categoryName(categoryBean.getCategoryName())
-			.categoryAvailable("Y")
+			.categoryAvailable(categoryBean.getCategoryAvailable())
 			.build();
 		LOGGER.info("CategoryService.createCategory() --- CategoryEntity to save: " + categoryEntityToSave);
 		CategoryEntity categoryEntitySaved = categoryRepository.save(categoryEntityToSave);
