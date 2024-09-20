@@ -140,7 +140,7 @@ public class MilkBrandsController {
 	@ExceptionHandler(value = {MilkBrandNotAvailableException.class})
 	public ResponseEntity<Void> handleMilkBrandNotAvailableException(MilkBrandNotAvailableException milkBrandNotAvailableException) {
 		LOGGER.debug("MilkBrandsController.handleMilkBrandNotAvailableException() --- START");
-		LOGGER.info("DairyProductsController.handleDairyProductNotAvailableException() --- " +
+		LOGGER.info("MilkBrandsController.handleMilkBrandNotAvailableException() --- " +
 				milkBrandNotAvailableException.getMessage() +
 				", returning No Content 204");
 		LOGGER.debug("MilkBrandsController.handleMilkBrandNotAvailableException() --- END");
