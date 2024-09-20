@@ -82,7 +82,7 @@ public class MilkBrandService {
 		MilkBrandEntity milkBrandEntityToSave = MilkBrandEntity.builder()
 				.milkBrandName(milkBrandBean.getMilkBrandName())
 				.packaging(milkBrandBean.getPackaging())
-				.milkBrandAvailable("Y")
+				.milkBrandAvailable(milkBrandBean.getMilkBrandAvailable())
 				.dairyProductEntity(dairyProductEntity)
 				.build();
 		LOGGER.info("MilkBrandService.saveMilkBrand() --- milkBrandEntityToSave to save: " + milkBrandEntityToSave);
