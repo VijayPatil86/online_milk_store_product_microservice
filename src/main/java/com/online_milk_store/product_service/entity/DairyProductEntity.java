@@ -13,9 +13,8 @@ import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
-import lombok.ToString;
 
-@Getter @Setter @Builder @NoArgsConstructor @AllArgsConstructor @ToString
+@Getter @Setter @Builder @NoArgsConstructor @AllArgsConstructor
 @Entity
 @Table(name = "DAIRY_PRODUCT")
 public class DairyProductEntity {
@@ -33,4 +32,10 @@ public class DairyProductEntity {
 	@ManyToOne
 	@JoinColumn(name = "CATEGORY_ID")
 	private CategoryEntity categoryEntity;
+
+	@Override
+	public String toString() {
+		return "DairyProductEntity [dairyProductId=" + dairyProductId + ", dairyProductName=" + dairyProductName
+				+ ", dairyProductAvailable=" + dairyProductAvailable + ", categoryEntity=" + categoryEntity + "]";
+	}
 }
