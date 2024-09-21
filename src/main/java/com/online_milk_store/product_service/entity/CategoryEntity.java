@@ -11,9 +11,8 @@ import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
-import lombok.ToString;
 
-@Getter @Setter @Builder @NoArgsConstructor @AllArgsConstructor @ToString
+@Getter @Setter @Builder @NoArgsConstructor @AllArgsConstructor
 @Entity
 @Table(name = "CATEGORY")
 public class CategoryEntity {
@@ -27,4 +26,10 @@ public class CategoryEntity {
 	
 	@Column(name = "CATEGORY_AVAILABLE")
 	private String categoryAvailable;
+
+	@Override
+	public String toString() {
+		return "CategoryEntity [categoryId=" + categoryId + ", categoryName=" + categoryName + ", categoryAvailable="
+				+ categoryAvailable + "]";
+	}
 }
