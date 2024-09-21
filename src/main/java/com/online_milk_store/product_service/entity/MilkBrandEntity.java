@@ -2,6 +2,7 @@ package com.online_milk_store.product_service.entity;
 
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
+import jakarta.persistence.FetchType;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
@@ -13,9 +14,8 @@ import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
-import lombok.ToString;
 
-@Getter @Setter @Builder @NoArgsConstructor @AllArgsConstructor @ToString
+@Getter @Setter @Builder @NoArgsConstructor @AllArgsConstructor
 @Entity
 @Table(name = "MILK_BRAND")
 public class MilkBrandEntity {
@@ -36,4 +36,11 @@ public class MilkBrandEntity {
 	@ManyToOne
 	@JoinColumn(name = "DAIRY_PRODUCT_ID")
 	private DairyProductEntity dairyProductEntity;
+
+	@Override
+	public String toString() {
+		return "MilkBrandEntity [milkBrandId=" + milkBrandId + ", milkBrandName=" + milkBrandName + ", packaging="
+				+ packaging + ", milkBrandAvailable=" + milkBrandAvailable + ", dairyProductEntity="
+				+ dairyProductEntity + "]";
+	}
 }
