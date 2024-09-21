@@ -5,6 +5,7 @@ import org.apache.logging.log4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.CrossOrigin;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -16,6 +17,7 @@ import com.online_milk_store.product_service.bean.MilkBrandPurchaseBean;
 import com.online_milk_store.product_service.exception.MilkBrandNotAvailableException;
 import com.online_milk_store.product_service.service.MilkBrandPurchaseService;
 
+@CrossOrigin
 @RestController
 @RequestMapping("/milk-brand-item-purchase")
 public class MilkBrandPurchaseController {
