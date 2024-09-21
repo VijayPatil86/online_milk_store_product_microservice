@@ -14,4 +14,5 @@ public class MilkBrandPurchaseBean {
 	private int purchaseQuantity;
 	private float totalPurchasePrice;
 	private String purchaseDateTime;
+	private MilkBrandInventoryBean milkBrandInventoryBean;
 }
