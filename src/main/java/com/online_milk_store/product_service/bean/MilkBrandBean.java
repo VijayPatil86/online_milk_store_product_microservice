@@ -15,4 +15,5 @@ public class MilkBrandBean extends RepresentationModel<MilkBrandBean>{
 	private String milkBrandName;
 	private String packaging;
 	private String milkBrandAvailable;
+	private MilkBrandInventoryBean milkBrandInventoryBean;
 }
