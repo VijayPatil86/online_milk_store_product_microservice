@@ -11,19 +11,25 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import com.online_milk_store.product_service.bean.MilkBrandBean;
+import com.online_milk_store.product_service.bean.MilkBrandInventoryBean;
 import com.online_milk_store.product_service.entity.DairyProductEntity;
 import com.online_milk_store.product_service.entity.MilkBrandEntity;
+import com.online_milk_store.product_service.entity.MilkBrandInventoryEntity;
 import com.online_milk_store.product_service.exception.DairyProductNotAvailableException;
 import com.online_milk_store.product_service.exception.MilkBrandAlreadyExistsException;
 import com.online_milk_store.product_service.exception.MilkBrandNotAvailableException;
 import com.online_milk_store.product_service.exception.MilkBrandsNotAvailableException;
 import com.online_milk_store.product_service.repository.DairyProductRepository;
+import com.online_milk_store.product_service.repository.MilkBrandInventoryRepository;
 import com.online_milk_store.product_service.repository.MilkBrandRepository;
 
 @Service
 @Transactional
 public class MilkBrandService {
 	static final private Logger LOGGER = LogManager.getLogger(MilkBrandService.class);
+
+	@Autowired
+	private MilkBrandInventoryRepository milkBrandInventoryRepository;
 
 	@Autowired
 	private MilkBrandRepository milkBrandRepository;
@@ -34,21 +40,17 @@ public class MilkBrandService {
 	@Transactional(readOnly = true)
 	public List<MilkBrandBean> getAllAvailableMilkBrands() {
 		LOGGER.debug("MilkBrandService.getAllAvailableMilkBrands() --- START");
-		List<MilkBrandEntity> listAllAvailableMilkBrandsEntities =
-				milkBrandRepository.findByMilkBrandAvailableOrderByMilkBrandNameAscPackagingAsc("Y");
-		LOGGER.info("MilkBrandService.getAllAvailableMilkBrands() --- listAllAvailableMilkBrandsEntities: " + listAllAvailableMilkBrandsEntities);
-		if(listAllAvailableMilkBrandsEntities == null || listAllAvailableMilkBrandsEntities.size() == 0) {
-			LOGGER.info("MilkBrandService.getAllAvailableMilkBrands() --- all milk brands not available, raising MilkBrandsNotAvailableException");
-			throw new MilkBrandsNotAvailableException();
-		}
-		List<MilkBrandBean> listAllAvailableMilkBrandsBeans = listAllAvailableMilkBrandsEntities.stream()
-				.map(milkBrandEntity -> MilkBrandBean.builder()
-						.milkBrandId(milkBrandEntity.getMilkBrandId())
-						.milkBrandName(milkBrandEntity.getMilkBrandName())
-						.packaging(milkBrandEntity.getPackaging())
-						.milkBrandAvailable(milkBrandEntity.getMilkBrandAvailable())
-						.build())
-				.collect(Collectors.toList());
+		List<MilkBrandInventoryEntity> listMilkBrandInventoryEntity = milkBrandInventoryRepository.findAll();
+		List<MilkBrandBean> listAllAvailableMilkBrandsBeans = listMilkBrandInventoryEntity.stream()
+			.map(milkBrandInventoryEntity -> MilkBrandBean.builder()
+					.milkBrandId(milkBrandInventoryEntity.getMilkBrandEntity().getMilkBrandId())
+					.milkBrandName(milkBrandInventoryEntity.getMilkBrandEntity().getMilkBrandName())
+					.packaging(milkBrandInventoryEntity.getMilkBrandEntity().getPackaging())
+					.milkBrandInventoryBean(MilkBrandInventoryBean.builder()
+							.currentPurchasePrice(milkBrandInventoryEntity.getCurrentPurchasePrice())
+							.build())
+					.build())
+			.collect(Collectors.toList());
 		LOGGER.info("MilkBrandService.getAllAvailableMilkBrands() --- listAllAvailableMilkBrandsBeans: " + listAllAvailableMilkBrandsBeans);
 		LOGGER.debug("MilkBrandService.getAllAvailableMilkBrands() --- END");
 		return listAllAvailableMilkBrandsBeans;
