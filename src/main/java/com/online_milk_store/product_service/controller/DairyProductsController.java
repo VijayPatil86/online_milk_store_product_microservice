@@ -7,6 +7,7 @@ import java.util.List;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.hateoas.Link;
 import org.springframework.hateoas.server.mvc.WebMvcLinkBuilder;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -26,6 +27,7 @@ import com.online_milk_store.product_service.exception.DairyProductAlreadyExists
 import com.online_milk_store.product_service.exception.DairyProductNotAvailableException;
 import com.online_milk_store.product_service.exception.DairyProductsNotAvailableException;
 import com.online_milk_store.product_service.service.DairyProductService;
+import com.online_milk_store.product_service.util.Util;
 
 @CrossOrigin
 @RestController
@@ -36,13 +38,17 @@ public class DairyProductsController {
 	@Autowired
 	private DairyProductService dairyProductService;
 
+	@Autowired
+	private Util util;
+
 	@GetMapping("/get_HATEOAS_links")
 	public ResponseEntity<DairyProductsContainer> get_HATEOAS_links() {
 		LOGGER.debug("DairyProductsController.get_HATEOAS_links() --- START");
 		DairyProductsContainer dairyProductsContainer = DairyProductsContainer.builder().build();
-		dairyProductsContainer.add(
-				WebMvcLinkBuilder.linkTo(methodOn(DairyProductsController.class).getAllAvailableDairyProducts()).withRel("link_getAllAvailableDairyProducts")
-		);
+		Link linkGateway = util.getLinkGateway(WebMvcLinkBuilder.linkTo(methodOn(DairyProductsController.class).getAllAvailableDairyProducts())
+				.withRel("link_getAllAvailableDairyProducts")
+				.getHref(), "link_getAllAvailableDairyProducts");
+		dairyProductsContainer.add(linkGateway);
 		LOGGER.info("DairyProductsController.get_HATEOAS_links() --- dairyProductsContainer: " + dairyProductsContainer);
 		LOGGER.debug("DairyProductsController.get_HATEOAS_links() --- END");
 		return new ResponseEntity<>(dairyProductsContainer, HttpStatus.OK);
@@ -53,14 +59,21 @@ public class DairyProductsController {
 		LOGGER.debug("DairyProductsController.getAllAvailableDairyProducts() --- START");
 		List<DairyProductBean> listAllAvailableDairyProductsBeans = dairyProductService.getAllAvailableDairyProducts();
 		listAllAvailableDairyProductsBeans.stream()
-			.forEach(dairyProductBean -> dairyProductBean.add(
-					WebMvcLinkBuilder.linkTo(methodOn(DairyProductsController.class).getDairyProductById(dairyProductBean.getDairyProductId())).withRel("link_getDairyProductById")));
+			.forEach(dairyProductBean -> {
+				Link linkGateway = util.getLinkGateway(WebMvcLinkBuilder.linkTo(methodOn(DairyProductsController.class)
+						.getDairyProductById(dairyProductBean.getDairyProductId()))
+					.withRel("link_getDairyProductById")
+					.getHref(), "link_getDairyProductById");
+				dairyProductBean.add(linkGateway);
+			});
 		LOGGER.info("DairyProductsController.getAllAvailableDairyProducts() --- listAllAvailableDairyProductsBeans with HATEOAS link: " + listAllAvailableDairyProductsBeans);
 		DairyProductsContainer dairyProductsContainer = DairyProductsContainer.builder()
 				.dairyProductBeans(listAllAvailableDairyProductsBeans)
 				.build();
-		dairyProductsContainer.add(
-				WebMvcLinkBuilder.linkTo(methodOn(DairyProductsController.class).getAllAvailableDairyProducts()).withRel("link_getAllAvailableDairyProducts"));
+		Link linkGateway = util.getLinkGateway(WebMvcLinkBuilder.linkTo(methodOn(DairyProductsController.class).getAllAvailableDairyProducts())
+				.withRel("link_getAllAvailableDairyProducts")
+				.getHref(), "link_getAllAvailableDairyProducts");
+		dairyProductsContainer.add(linkGateway);
 		LOGGER.info("DairyProductsController.getAllAvailableDairyProducts() --- dairyProductsContainer: " + dairyProductsContainer);
 		ResponseEntity<DairyProductsContainer> responseEntity = new ResponseEntity<>(dairyProductsContainer, HttpStatus.OK);
 		LOGGER.debug("DairyProductsController.getAllAvailableDairyProducts() --- END");
@@ -74,13 +87,19 @@ public class DairyProductsController {
 		LOGGER.info("DairyProductsController.saveDairyProduct() --- dairyProductBean to save: " + dairyProductBean);
 		DairyProductBean savedDairyProductBean = dairyProductService.saveDairyProduct(categoryId, dairyProductBean);
 		LOGGER.info("DairyProductsController.saveDairyProduct() --- saved dairyProductBean: " + savedDairyProductBean);
-		savedDairyProductBean.add(
-				WebMvcLinkBuilder.linkTo(methodOn(DairyProductsController.class).getDairyProductById(savedDairyProductBean.getDairyProductId())).withRel("link_getDairyProductById"));
+		Link linkGateway = util.getLinkGateway(WebMvcLinkBuilder.linkTo(methodOn(DairyProductsController.class)
+				.getDairyProductById(savedDairyProductBean.getDairyProductId()))
+			.withRel("link_getDairyProductById")
+			.getHref(), "link_getDairyProductById");
+		savedDairyProductBean.add(linkGateway);
 		LOGGER.info("DairyProductsController.saveDairyProduct() --- HATEOAS links to dairyProductBean are: " + savedDairyProductBean);
 		DairyProductsContainer dairyProductsContainer = DairyProductsContainer.builder().build();
 		dairyProductsContainer.setDairyProductBean(savedDairyProductBean);
-		dairyProductsContainer.add(
-				WebMvcLinkBuilder.linkTo(methodOn(DairyProductsController.class).getAllAvailableDairyProducts()).withRel("link_getAllAvailableDairyProducts"));
+		linkGateway = util.getLinkGateway(WebMvcLinkBuilder.linkTo(methodOn(DairyProductsController.class)
+				.getAllAvailableDairyProducts())
+			.withRel("link_getAllAvailableDairyProducts")
+			.getHref(), "link_getAllAvailableDairyProducts");
+		dairyProductsContainer.add(linkGateway);
 		LOGGER.info("DairyProductsController.saveDairyProduct() --- dairyProductsContainer: " + dairyProductsContainer);
 		LOGGER.debug("DairyProductsController.saveDairyProduct() --- END");
 		return new ResponseEntity<>(dairyProductsContainer, HttpStatus.OK);
@@ -91,14 +110,20 @@ public class DairyProductsController {
 		LOGGER.debug("DairyProductsController.getDairyProductById() --- START");
 		LOGGER.info("DairyProductsController.getDairyProductById() --- dairyProductId: " + dairyProductId);
 		DairyProductBean dairyProductBean = dairyProductService.getDairyProductById(dairyProductId);
-		dairyProductBean.add(
-				WebMvcLinkBuilder.linkTo(methodOn(DairyProductsController.class).getDairyProductById(dairyProductId)).withRel("link_getDairyProductById"));
+		Link linkGateway = util.getLinkGateway(WebMvcLinkBuilder.linkTo(methodOn(DairyProductsController.class)
+				.getDairyProductById(dairyProductId))
+			.withRel("link_getDairyProductById")
+			.getHref(), "link_getDairyProductById");
+		dairyProductBean.add(linkGateway);
 		LOGGER.info("DairyProductsController.getDairyProductById() --- dairyProductBean: " + dairyProductBean);
 		DairyProductsContainer dairyProductsContainer = DairyProductsContainer.builder()
 				.dairyProductBean(dairyProductBean)
 				.build();
-		dairyProductsContainer.add(
-				WebMvcLinkBuilder.linkTo(methodOn(DairyProductsController.class).getAllAvailableDairyProducts()).withRel("link_getAllAvailableDairyProducts"));
+		linkGateway = util.getLinkGateway(WebMvcLinkBuilder.linkTo(methodOn(DairyProductsController.class)
+				.getAllAvailableDairyProducts())
+			.withRel("link_getAllAvailableDairyProducts")
+			.getHref(), "link_getAllAvailableDairyProducts");
+		dairyProductsContainer.add(linkGateway);
 		LOGGER.info("DairyProductsController.getDairyProductById() --- dairyProductsContainer: " + dairyProductsContainer);
 		return new ResponseEntity<>(dairyProductsContainer, HttpStatus.OK);
 	}
