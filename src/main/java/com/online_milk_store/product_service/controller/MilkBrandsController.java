@@ -7,6 +7,7 @@ import java.util.List;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.hateoas.Link;
 import org.springframework.hateoas.server.mvc.WebMvcLinkBuilder;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -26,6 +27,7 @@ import com.online_milk_store.product_service.exception.MilkBrandAlreadyExistsExc
 import com.online_milk_store.product_service.exception.MilkBrandNotAvailableException;
 import com.online_milk_store.product_service.exception.MilkBrandsNotAvailableException;
 import com.online_milk_store.product_service.service.MilkBrandService;
+import com.online_milk_store.product_service.util.Util;
 
 @CrossOrigin
 @RestController
@@ -36,12 +38,18 @@ public class MilkBrandsController {
 	@Autowired
 	private MilkBrandService milkBrandService;
 
+	@Autowired
+	private Util util;
+
 	@GetMapping("/get_HATEOAS_links")
 	public ResponseEntity<MilkBrandsContainer> get_HATEOAS_links() {
 		LOGGER.debug("MilkBrandsController.get_HATEOAS_links() --- START");
 		MilkBrandsContainer milkBrandsContainer = MilkBrandsContainer.builder().build();
-		milkBrandsContainer.add(
-				WebMvcLinkBuilder.linkTo(methodOn(MilkBrandsController.class).getAllAvailableMilkBrands()).withRel("link_getAllAvailableMilkBrands"));
+		Link linkGateway = util.getLinkGateway(WebMvcLinkBuilder.linkTo(methodOn(MilkBrandsController.class)
+				.getAllAvailableMilkBrands())
+			.withRel("link_getAllAvailableMilkBrands")
+			.getHref(), "link_getAllAvailableMilkBrands");
+		milkBrandsContainer.add(linkGateway);
 		LOGGER.debug("MilkBrandsController.get_HATEOAS_links() --- milkBrandsContainer: " + milkBrandsContainer);
 		LOGGER.debug("MilkBrandsController.get_HATEOAS_links() --- END");
 		return new ResponseEntity<>(milkBrandsContainer, HttpStatus.OK);
@@ -52,17 +60,22 @@ public class MilkBrandsController {
 		LOGGER.debug("MilkBrandsController.getAllAvailableMilkBrands() --- START");
 		List<MilkBrandBean> listAllAvailableMilkBrandsBeans = milkBrandService.getAllAvailableMilkBrands();
 		listAllAvailableMilkBrandsBeans.stream()
-			.forEach(milkBrandsBean ->
-					milkBrandsBean.add(
-							WebMvcLinkBuilder.linkTo(methodOn(MilkBrandsController.class).getMilkBrandById(milkBrandsBean.getMilkBrandId()))
-							.withRel("link_getMilkBrandById")));
+			.forEach(milkBrandsBean -> {
+				Link linkGateway = util.getLinkGateway(WebMvcLinkBuilder.linkTo(methodOn(MilkBrandsController.class)
+						.getMilkBrandById(milkBrandsBean.getMilkBrandId()))
+					.withRel("link_getMilkBrandById")
+					.getHref(), "link_getMilkBrandById");
+				milkBrandsBean.add(linkGateway);
+			});
 		LOGGER.info("MilkBrandsController.getAllAvailableMilkBrands() --- listAllAvailableMilkBrandsBeans: " + listAllAvailableMilkBrandsBeans);
 		MilkBrandsContainer milkBrandsContainer = MilkBrandsContainer.builder()
 				.milkBrandBeans(listAllAvailableMilkBrandsBeans)
 				.build();
-		milkBrandsContainer.add(
-				WebMvcLinkBuilder.linkTo(methodOn(MilkBrandsController.class).getAllAvailableMilkBrands()).withRel("link_getAllAvailableMilkBrands")
-			);
+		Link linkGateway = util.getLinkGateway(WebMvcLinkBuilder.linkTo(methodOn(MilkBrandsController.class)
+				.getAllAvailableMilkBrands())
+			.withRel("link_getAllAvailableMilkBrands")
+			.getHref(), "link_getAllAvailableMilkBrands");
+		milkBrandsContainer.add(linkGateway);
 		LOGGER.info("MilkBrandsController.getAllAvailableMilkBrands() --- milkBrandsContainer: " + milkBrandsContainer);
 		LOGGER.debug("MilkBrandsController.getAllAvailableMilkBrands() --- END");
 		return new ResponseEntity<>(milkBrandsContainer, HttpStatus.OK);
@@ -76,15 +89,19 @@ public class MilkBrandsController {
 		LOGGER.info("MilkBrandsController.saveMilkBrand() --- milkBrandBean to save: " + milkBrandBean);
 		MilkBrandBean savedMilkBrandBean = milkBrandService.saveMilkBrand(dairyProductId, milkBrandBean);
 		LOGGER.info("MilkBrandsController.saveMilkBrand() --- saved MilkBrandBean: " + savedMilkBrandBean);
-		savedMilkBrandBean.add(
-				WebMvcLinkBuilder.linkTo(methodOn(MilkBrandsController.class).getMilkBrandById(savedMilkBrandBean.getMilkBrandId()))
-				.withRel("link_getMilkBrandById"));
+		Link linkGateway = util.getLinkGateway(WebMvcLinkBuilder.linkTo(methodOn(MilkBrandsController.class)
+				.getMilkBrandById(savedMilkBrandBean.getMilkBrandId()))
+			.withRel("link_getMilkBrandById")
+			.getHref(), "link_getMilkBrandById");
+		savedMilkBrandBean.add(linkGateway);
 		LOGGER.info("MilkBrandsController.saveMilkBrand() --- added HATEOAS links to MilkBrandBean: " + savedMilkBrandBean);
 		MilkBrandsContainer milkBrandsContainer = MilkBrandsContainer.builder().build();
 		milkBrandsContainer.setMilkBrandBean(savedMilkBrandBean);
-		milkBrandsContainer.add(
-				WebMvcLinkBuilder.linkTo(methodOn(MilkBrandsController.class).getAllAvailableMilkBrands())
-				.withRel("link_getAllAvailableMilkBrands"));
+		linkGateway = util.getLinkGateway(WebMvcLinkBuilder.linkTo(methodOn(MilkBrandsController.class)
+				.getAllAvailableMilkBrands())
+			.withRel("link_getAllAvailableMilkBrands")
+			.getHref(), "link_getAllAvailableMilkBrands");
+		milkBrandsContainer.add(linkGateway);
 		LOGGER.info("MilkBrandsController.saveMilkBrand() --- milkBrandsContainer: " + milkBrandsContainer);
 		LOGGER.debug("MilkBrandsController.saveMilkBrand() --- END");
 		return new ResponseEntity<>(milkBrandsContainer, HttpStatus.OK);
@@ -95,14 +112,20 @@ public class MilkBrandsController {
 		LOGGER.debug("MilkBrandsController.getMilkBrandById() --- START");
 		LOGGER.info("MilkBrandsController.getMilkBrandById() --- milkBrandId: " + milkBrandId);
 		MilkBrandBean milkBrandBean = milkBrandService.getMilkBrandById(milkBrandId);
-		milkBrandBean.add(
-				WebMvcLinkBuilder.linkTo(methodOn(MilkBrandsController.class).getMilkBrandById(milkBrandId)).withRel("link_getMilkBrandById"));
+		Link linkGateway = util.getLinkGateway(WebMvcLinkBuilder.linkTo(methodOn(MilkBrandsController.class)
+				.getMilkBrandById(milkBrandId))
+			.withRel("link_getMilkBrandById")
+			.getHref(), "link_getMilkBrandById");
+		milkBrandBean.add(linkGateway);
 		LOGGER.info("MilkBrandsController.getMilkBrandById() --- milkBrandBean: " + milkBrandBean);
 		MilkBrandsContainer milkBrandsContainer = MilkBrandsContainer.builder()
 				.milkBrandBean(milkBrandBean)
 				.build();
-		milkBrandsContainer.add(
-				WebMvcLinkBuilder.linkTo(methodOn(MilkBrandsController.class).getAllAvailableMilkBrands()).withRel("link_getAllAvailableMilkBrands"));
+		linkGateway = util.getLinkGateway(WebMvcLinkBuilder.linkTo(methodOn(MilkBrandsController.class)
+				.getAllAvailableMilkBrands())
+			.withRel("link_getAllAvailableMilkBrands")
+			.getHref(), "link_getAllAvailableMilkBrands");
+		milkBrandsContainer.add(linkGateway);
 		LOGGER.info("MilkBrandsController.getMilkBrandById() --- milkBrandsContainer: " + milkBrandsContainer);
 		LOGGER.debug("MilkBrandsController.getMilkBrandById() --- END");
 		return new ResponseEntity<>(milkBrandsContainer, HttpStatus.OK);
