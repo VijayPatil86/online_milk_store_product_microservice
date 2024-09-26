@@ -7,6 +7,7 @@ import java.util.List;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.hateoas.Link;
 import org.springframework.hateoas.server.mvc.WebMvcLinkBuilder;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -26,23 +27,28 @@ import com.online_milk_store.product_service.exception.CategoriesNotAvailableExc
 import com.online_milk_store.product_service.exception.CategoryAlreadyExistsException;
 import com.online_milk_store.product_service.exception.CategoryNotAvailableException;
 import com.online_milk_store.product_service.service.CategoryService;
+import com.online_milk_store.product_service.util.Util;
 
 @CrossOrigin
 @RestController
 @RequestMapping("/categories")
 public class CategoriesController {
 	static final private Logger LOGGER = LogManager.getLogger(CategoriesController.class);
-	
+
 	@Autowired
 	private CategoryService categoryService;
-	
+
+	@Autowired
+	private Util util;
+
 	@GetMapping("/get_HATEOAS_links")
 	public ResponseEntity<CategoriesContainer> get_HATEOAS_links() {
 		LOGGER.debug("CategoriesController.get_HATEOAS_links() --- START");
 		CategoriesContainer categoriesContainer = CategoriesContainer.builder().build();
-		categoriesContainer.add(
-				WebMvcLinkBuilder.linkTo(methodOn(CategoriesController.class).getAllAvailableCategories()).withRel("link_getAllAvailableCategories")
-		);
+		Link linkGateway = util.getLinkGateway(WebMvcLinkBuilder.linkTo(methodOn(CategoriesController.class).getAllAvailableCategories())
+				.withRel("link_getAllAvailableCategories")
+				.getHref(), "link_getAllAvailableCategories");
+		categoriesContainer.add(linkGateway);
 		LOGGER.info("CategoriesController.get_HATEOAS_links() --- categoriesContainer: " + categoriesContainer);
 		LOGGER.debug("CategoriesController.get_HATEOAS_links() --- END");
 		return new ResponseEntity<>(categoriesContainer, HttpStatus.OK);
@@ -55,14 +61,20 @@ public class CategoriesController {
 		LOGGER.info("CategoriesController.getAllAvailableCategories() --- listAllAvailableCategoryBeans: " + listAllAvailableCategoriesBeans);
 		LOGGER.info("CategoriesController.getAllAvailableCategories() --- adding HATEOAS links");
 		listAllAvailableCategoriesBeans.stream()
-			.forEach(availableCategoriesBean ->
-				availableCategoriesBean.add(
-						WebMvcLinkBuilder.linkTo(methodOn(CategoriesController.class).getCategoryById(availableCategoriesBean.getCategoryId())).withRel("link_getCategoryById")));
+			.forEach(availableCategoriesBean -> {
+				Link linkGateway = util.getLinkGateway(WebMvcLinkBuilder.linkTo(methodOn(CategoriesController.class)
+						.getCategoryById(availableCategoriesBean.getCategoryId()))
+						.withRel("link_getCategoryById")
+						.getHref(), "link_getCategoryById");
+				availableCategoriesBean.add(linkGateway);
+			});
 		CategoriesContainer categoryContainer = CategoriesContainer.builder()
 				.categoryBeans(listAllAvailableCategoriesBeans)
 				.build();
-		categoryContainer.add(
-				WebMvcLinkBuilder.linkTo(methodOn(CategoriesController.class).getAllAvailableCategories()).withRel("link_getAllAvailableCategories"));
+		Link linkGateway = util.getLinkGateway(WebMvcLinkBuilder.linkTo(methodOn(CategoriesController.class).getAllAvailableCategories())
+				.withRel("link_getAllAvailableCategories")
+				.getHref(), "link_getAllAvailableCategories");
+		categoryContainer.add(linkGateway);
 		LOGGER.info("CategoriesController.getAllAvailableCategories() --- HATEOAS links are: " + categoryContainer);
 		ResponseEntity<CategoriesContainer> responseEntity = new ResponseEntity<>(categoryContainer, HttpStatus.OK);
 		LOGGER.debug("CategoriesController.getAllAvailableCategories() --- END");
@@ -76,13 +88,18 @@ public class CategoriesController {
 		CategoryBean createdCategoryBean = categoryService.createCategory(categoryBean);
 		LOGGER.info("CategoryService.createCategory() --- createdCategoryBean: " + createdCategoryBean);
 		LOGGER.info("CategoriesController.createCategory() --- adding HATEOAS links");
-		createdCategoryBean.add(
-				WebMvcLinkBuilder.linkTo(methodOn(CategoriesController.class).getCategoryById(createdCategoryBean.getCategoryId())).withRel("link_getCategoryById"));
+		Link linkGateway = util.getLinkGateway(WebMvcLinkBuilder.linkTo(methodOn(CategoriesController.class)
+				.getCategoryById(createdCategoryBean.getCategoryId()))
+				.withRel("link_getCategoryById")
+				.getHref(), "link_getCategoryById");
+		createdCategoryBean.add(linkGateway);
 		CategoriesContainer categoriesContainer = CategoriesContainer.builder()
 				.categoryBean(createdCategoryBean)
 				.build();
-		categoriesContainer.add(
-				WebMvcLinkBuilder.linkTo(methodOn(CategoriesController.class).getAllAvailableCategories()).withRel("link_getAllAvailableCategories"));
+		linkGateway = util.getLinkGateway(WebMvcLinkBuilder.linkTo(methodOn(CategoriesController.class).getAllAvailableCategories())
+				.withRel("link_getAllAvailableCategories")
+				.getHref(), "link_getAllAvailableCategories");
+		categoriesContainer.add(linkGateway);
 		LOGGER.info("CategoryService.createCategory() --- categoriesContainer: " + categoriesContainer);
 		ResponseEntity<CategoriesContainer> responseEntity = new ResponseEntity<>(categoriesContainer, HttpStatus.OK);
 		LOGGER.debug("CategoriesController.createCategory() --- END");
@@ -97,13 +114,17 @@ public class CategoriesController {
 		categoryBean = categoryService.updateCategory(categoryId, categoryBean);
 		LOGGER.info("CategoriesController.updateCategory() --- updated Category:" + categoryBean);
 		LOGGER.info("CategoriesController.updateCategory() --- adding HATEOAS links");
-		categoryBean.add(
-				WebMvcLinkBuilder.linkTo(methodOn(CategoriesController.class).getCategoryById(categoryBean.getCategoryId())).withRel("link_getCategoryById"));
+		Link linkGateway = util.getLinkGateway(WebMvcLinkBuilder.linkTo(methodOn(CategoriesController.class).getCategoryById(categoryBean.getCategoryId()))
+				.withRel("link_getCategoryById")
+				.getHref(), "link_getCategoryById");
+		categoryBean.add(linkGateway);
 		CategoriesContainer categoriesContainer = CategoriesContainer.builder()
 				.categoryBean(categoryBean)
 				.build();
-		categoriesContainer.add(
-				WebMvcLinkBuilder.linkTo(methodOn(CategoriesController.class).getAllAvailableCategories()).withRel("link_getAllAvailableCategories"));
+		linkGateway = util.getLinkGateway(WebMvcLinkBuilder.linkTo(methodOn(CategoriesController.class).getAllAvailableCategories())
+				.withRel("link_getAllAvailableCategories")
+				.getHref(), "link_getAllAvailableCategories");
+		categoriesContainer.add(linkGateway);
 		LOGGER.info("CategoriesController.updateCategory() --- categoriesContainer: " + categoriesContainer);
 		LOGGER.debug("CategoriesController.updateCategory() --- END");
 		return new ResponseEntity<>(categoriesContainer, HttpStatus.OK);
@@ -116,13 +137,17 @@ public class CategoriesController {
 		CategoryBean categoryBean = categoryService.getCategoryById(categoryId);
 		LOGGER.info("CategoriesController.getCategoryById() --- categoryBean: " + categoryBean);
 		LOGGER.info("CategoriesController.getCategoryById() --- adding HATEOAS links");
-		categoryBean.add(
-				WebMvcLinkBuilder.linkTo(methodOn(CategoriesController.class).getCategoryById(categoryBean.getCategoryId())).withRel("link_getCategoryById"));
+		Link linkGateway = util.getLinkGateway(WebMvcLinkBuilder.linkTo(methodOn(CategoriesController.class).getCategoryById(categoryBean.getCategoryId()))
+				.withRel("link_getCategoryById")
+				.getHref(), "link_getCategoryById");
+		categoryBean.add(linkGateway);
 		CategoriesContainer categoriesContainer = CategoriesContainer.builder()
 				.categoryBean(categoryBean)
 				.build();
-		categoriesContainer.add(
-				WebMvcLinkBuilder.linkTo(methodOn(CategoriesController.class).getAllAvailableCategories()).withRel("link_getAllAvailableCategories"));
+		linkGateway = util.getLinkGateway(WebMvcLinkBuilder.linkTo(methodOn(CategoriesController.class).getAllAvailableCategories())
+				.withRel("link_getAllAvailableCategories")
+				.getHref(), "link_getAllAvailableCategories");
+		categoriesContainer.add(linkGateway);
 		LOGGER.info("CategoriesController.getCategoryById() --- categoriesContainer: " + categoriesContainer);
 		LOGGER.debug("CategoriesController.getCategoryById() --- END");
 		return new ResponseEntity<>(categoriesContainer, HttpStatus.OK);
@@ -136,7 +161,7 @@ public class CategoriesController {
 		LOGGER.debug("CategoriesController.handleCategoriesNotAvailableException() --- END");
 		return ResponseEntity.noContent().build();
 	}
-	
+
 	@ExceptionHandler(value = {CategoryAlreadyExistsException.class})
 	public ResponseEntity<String> handleCategoryAlreadyExistsException(CategoryAlreadyExistsException categoryAlreadyExistsException) {
 		LOGGER.debug("CategoriesController.handleCategoryAlreadyExistsException() --- START");
