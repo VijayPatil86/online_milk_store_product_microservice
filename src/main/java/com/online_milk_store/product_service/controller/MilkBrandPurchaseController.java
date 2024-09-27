@@ -19,7 +19,7 @@ import com.online_milk_store.product_service.service.MilkBrandPurchaseService;
 
 @CrossOrigin
 @RestController
-@RequestMapping("/milk-brand-item-purchase")
+@RequestMapping("/product-service/milk-brand-item-purchase")
 public class MilkBrandPurchaseController {
 	static final private Logger LOGGER = LogManager.getLogger(MilkBrandPurchaseController.class);
 

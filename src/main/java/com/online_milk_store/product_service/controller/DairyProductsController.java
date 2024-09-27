@@ -31,7 +31,7 @@ import com.online_milk_store.product_service.util.Util;
 
 @CrossOrigin
 @RestController
-@RequestMapping("/dairy-products")
+@RequestMapping("/product-service/dairy-products")
 public class DairyProductsController {
 	static final private Logger LOGGER = LogManager.getLogger(DairyProductsController.class);
 
