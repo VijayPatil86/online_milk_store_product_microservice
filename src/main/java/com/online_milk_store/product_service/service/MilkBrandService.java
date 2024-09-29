@@ -18,7 +18,6 @@ import com.online_milk_store.product_service.entity.MilkBrandInventoryEntity;
 import com.online_milk_store.product_service.exception.DairyProductNotAvailableException;
 import com.online_milk_store.product_service.exception.MilkBrandAlreadyExistsException;
 import com.online_milk_store.product_service.exception.MilkBrandNotAvailableException;
-import com.online_milk_store.product_service.exception.MilkBrandsNotAvailableException;
 import com.online_milk_store.product_service.repository.DairyProductRepository;
 import com.online_milk_store.product_service.repository.MilkBrandInventoryRepository;
 import com.online_milk_store.product_service.repository.MilkBrandRepository;
