@@ -37,7 +37,7 @@ public class MilkBrandService {
 	private DairyProductRepository dairyProductRepository;
 
 	@Transactional(readOnly = true)
-	public List<MilkBrandBean> getAllAvailableMilkBrands() {
+	public List<MilkBrandBean> getAllAvailableMilkBrandsForCustomer() {
 		LOGGER.debug("MilkBrandService.getAllAvailableMilkBrands() --- START");
 		List<MilkBrandInventoryEntity> listMilkBrandInventoryEntity = milkBrandInventoryRepository.findAll();
 		List<MilkBrandBean> listAllAvailableMilkBrandsBeans = listMilkBrandInventoryEntity.stream()
@@ -46,7 +46,7 @@ public class MilkBrandService {
 					.milkBrandName(milkBrandInventoryEntity.getMilkBrandEntity().getMilkBrandName())
 					.packaging(milkBrandInventoryEntity.getMilkBrandEntity().getPackaging())
 					.milkBrandInventoryBean(MilkBrandInventoryBean.builder()
-							.currentPurchasePrice(milkBrandInventoryEntity.getCurrentPurchasePrice())
+							.currentPurchasePrice(milkBrandInventoryEntity.getCurrentSellPrice())
 							.build())
 					.build())
 			.collect(Collectors.toList());
