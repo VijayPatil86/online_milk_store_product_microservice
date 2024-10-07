@@ -55,10 +55,10 @@ public class MilkBrandsController {
 		return new ResponseEntity<>(milkBrandsContainer, HttpStatus.OK);
 	}
 
-	@GetMapping
+	@GetMapping("/customer")
 	public ResponseEntity<MilkBrandsContainer> getAllAvailableMilkBrands() {
 		LOGGER.debug("MilkBrandsController.getAllAvailableMilkBrands() --- START");
-		List<MilkBrandBean> listAllAvailableMilkBrandsBeans = milkBrandService.getAllAvailableMilkBrands();
+		List<MilkBrandBean> listAllAvailableMilkBrandsBeans = milkBrandService.getAllAvailableMilkBrandsForCustomer();
 		listAllAvailableMilkBrandsBeans.stream()
 			.forEach(milkBrandsBean -> {
 				Link linkGateway = util.getLinkGateway(WebMvcLinkBuilder.linkTo(methodOn(MilkBrandsController.class)
